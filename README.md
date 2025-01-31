@@ -1,37 +1,3 @@
-<div align="center">
-  <br>
-  <a href="">
-    <img src="res/github/ollama-telegram-readme.png" width="200" height="200">
-  </a>
-  <h1>🦙 Ollama Telegram Bot</h1>
-  <p>
-    <b>Chat with your LLM, using Telegram bot!</b><br>
-    <b>Feel free to contribute!</b><br>
-  </p>
-  <br>
-  <p align="center">
-    <img src="https://img.shields.io/docker/pulls/ruecat/ollama-telegram?style=for-the-badge">
-  </p>
-  <br>
-</div>
-
-## Features
-Here's features that you get out of the box:
-
-- [x] Fully dockerized bot
-- [x] Response streaming without ratelimit with **SentenceBySentence** method
-- [x] Mention [@] bot in group to receive answer
-
-## Roadmap
-- [x] Docker config & automated tags by [StanleyOneG](https://github.com/StanleyOneG), [ShrirajHegde](https://github.com/ShrirajHegde)
-- [x] History and `/reset` by [ShrirajHegde](https://github.com/ShrirajHegde)
-- [ ] Add more API-related functions [System Prompt Editor, Ollama Version fetcher, etc.]
-- [ ] Redis DB integration
-- [ ] Update bot UI
-
-## Prerequisites
-- [Telegram-Bot Token](https://core.telegram.org/bots#6-botfather)
-
 ## Installation (Non-Docker)
 + Install latest [Python](https://python.org/downloads)
 + Clone Repository
@@ -128,11 +94,3 @@ The official image is available at dockerhub: [ruecat/ollama-telegram](https://h
 |        `OLLAMA_PORT`        |                                                  Your OllamaAPI port                                                  |    No     |     11434     |                                                       |
 |            `TIMEOUT`        |                                    The timeout in seconds for generating responses                                    |    No     |     3000      |                                                       |
 | `ALLOW_ALL_USERS_IN_GROUPS` |                Allows all users in group chats interact with bot without adding them to USER_IDS list                 |    No     |       0       |                                                       |
-
-
-
-## Credits
-+ [Ollama](https://github.com/jmorganca/ollama)
-
-## Libraries used
-+ [Aiogram 3.x](https://github.com/aiogram/aiogram)

@@ -9,6 +9,7 @@ import traceback
 import io
 import base64
 import sqlite3
+import re
 bot = Bot(token=token)
 dp = Dispatcher()
 start_kb = InlineKeyboardBuilder()
@@ -111,34 +112,32 @@ async def command_start_handler(message: Message) -> None:
 
 @dp.message(Command("reset"))
 async def command_reset_handler(message: Message) -> None:
-    if message.from_user.id in allowed_ids:
-        if message.from_user.id in ACTIVE_CHATS:
-            async with ACTIVE_CHATS_LOCK:
-                ACTIVE_CHATS.pop(message.from_user.id)
-            logging.info(f"Chat has been reset for {message.from_user.first_name}")
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text="Chat has been reset",
-            )
+    if message.from_user.id in ACTIVE_CHATS:
+        async with ACTIVE_CHATS_LOCK:
+            ACTIVE_CHATS.pop(message.from_user.id)
+        logging.info(f"Chat has been reset for {message.from_user.first_name}")
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text="Chat has been reset",
+        )
 
 @dp.message(Command("history"))
 async def command_get_context_handler(message: Message) -> None:
-    if message.from_user.id in allowed_ids:
-        if message.from_user.id in ACTIVE_CHATS:
-            messages = ACTIVE_CHATS.get(message.chat.id)["messages"]
-            context = ""
-            for msg in messages:
-                context += f"*{msg['role'].capitalize()}*: {msg['content']}\n"
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text=context,
-                parse_mode=ParseMode.MARKDOWN,
-            )
-        else:
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text="No chat history available for this user",
-            )
+    if message.from_user.id in ACTIVE_CHATS:
+        messages = ACTIVE_CHATS.get(message.chat.id)["messages"]
+        context = ""
+        for msg in messages:
+            context += f"*{msg['role'].capitalize()}*: {msg['content']}\n"
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=context,
+            parse_mode=ParseMode.MARKDOWN,
+        )
+    else:
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text="No chat history available for this user",
+        )
 
 @dp.message(Command("addglobalprompt"))
 async def add_global_prompt_handler(message: Message):
@@ -413,16 +412,17 @@ async def handle_response(message, response_data, full_response):
     full_response_stripped = full_response.strip()
     if full_response_stripped == "":
         return
+    clean_response = re.sub(r"<think>.*?</think>", "", full_response_stripped, flags=re.DOTALL).strip()
     if response_data.get("done"):
-        text = f"{full_response_stripped}\n\n⚙️ {modelname}\nGenerated in {response_data.get('total_duration') / 1e9:.2f}s."
+        text = f"{clean_response}\n"
         await send_response(message, text)
         async with ACTIVE_CHATS_LOCK:
             if ACTIVE_CHATS.get(message.from_user.id) is not None:
                 ACTIVE_CHATS[message.from_user.id]["messages"].append(
-                    {"role": "assistant", "content": full_response_stripped}
+                    {"role": "assistant", "content": clean_response}
                 )
         logging.info(
-            f"[Response]: '{full_response_stripped}' for {message.from_user.first_name} {message.from_user.last_name}"
+            f"[Response]: '{clean_response}' for {message.from_user.first_name} {message.from_user.last_name}"
         )
         return True
     return False

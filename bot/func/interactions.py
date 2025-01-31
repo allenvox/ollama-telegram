@@ -175,23 +175,10 @@ def remove_user_from_db(user_id):
 def perms_allowed(func):
     @wraps(func)
     async def wrapper(message: types.Message = None, query: types.CallbackQuery = None):
-        user_id = message.from_user.id if message else query.from_user.id
-        if user_id in admin_ids or user_id in allowed_ids:
-            if message:
-                return await func(message)
-            elif query:
-                return await func(query=query)
-        else:
-            if message:
-                if message and message.chat.type in ["supergroup", "group"]:
-                    if allow_all_users_in_groups:
-                        return await func(message)
-                    return
-                await message.answer("Access Denied")
-            elif query:
-                if message and message.chat.type in ["supergroup", "group"]:
-                    return
-                await query.answer("Access Denied")
+        if message:
+            return await func(message)
+        elif query:
+            return await func(query=query)
 
     return wrapper
 
